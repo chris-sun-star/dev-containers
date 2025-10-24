@@ -1,0 +1,10 @@
+{
+  "languageserver": {
+    "elixir": {
+      "command": "/usr/local/bin/elixir-ls/language_server.sh",
+      "args": ["--stdio"],
+      "rootPatterns": ["mix.exs", ".vim/", ".git/", ".hg/"],
+      "filetypes": ["elixir", "eelixir"]
+    }
+  }
+}

@@ -1,0 +1,44 @@
+name: release elixir-dev-container
+
+on:
+  push:
+    tags:
+      - 'elixir-*'
+
+env:
+  tagName: ${{ github.ref_name }}
+
+jobs:
+  release-elixir-dev-container:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Set Version variables
+        id: set_version_vars
+        run: |
+          echo "version=$(echo $tagName | awk -F '-' '{print $2}')" >> $GITHUB_OUTPUT
+
+      - name: Create and push manifests w/o cache
+        uses: docker/build-push-action@v6
+        with:
+          context: ./elixir
+          platforms: linux/amd64,linux/arm64
+          file: ./elixir/Dockerfile
+          push: true
+          tags: |
+            ${{ vars.DOCKER_PUSH_BASE }}/elixir-dev-container:${{ steps.set_version_vars.outputs.version }}
+            ${{ vars.DOCKER_PUSH_BASE }}/elixir-dev-container:latest
